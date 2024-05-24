@@ -89,7 +89,12 @@ public void OnMapEnd()
 	}
 
 	delete periods;
-	gMessageGroups.Clear();
+
+	delete gMessageGroups;
+	gMessageGroups = new StringMap();
+
+	delete gGreetedAuthIds;
+	gGreetedAuthIds = new StringMap();
 }
 public void OnClientPostAdminCheck(int client)
 {
@@ -234,7 +239,9 @@ public Action Command_SAr(int client, int args)
 }
 public void LoadConfig()
 {
-	gLanguages.Clear();
+	delete gLanguages;
+	gLanguages = new StringMap();
+
 	ClearMessageEntry(gWelcomeMessage);
 	gWelcomeMessage.mTextByLanguage = null;
 	gWelcomeMessage.mHUDParams = null;

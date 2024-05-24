@@ -14,7 +14,7 @@ stock void AddMessagesToArray(KeyValues kv)
 			{
 				return;
 			}
-			if(StrEqual(sTempMap, "all") || SA_ContainsMap(sMapName, sTempMap) || SA_ContainsMapPreFix(sMapName, sTempMap))
+			if(strcmp(sTempMap, "all", false) == 0 || SA_ContainsMap(sMapName, sTempMap) || SA_ContainsMapPreFix(sMapName, sTempMap))
 			{
 				SMessageEntry message;
 				AddMessagesToEntry(kv, message);
@@ -65,9 +65,9 @@ stock void AddMessagesToEntry(KeyValues kv, SMessageEntry message)
 	message.mFlags = ReadFlagString(sMessageFlags);
 	kv.GetString("ignore", sMessageFlags, sizeof(sMessageFlags));
 	message.mIgnoreFlags = ReadFlagString(sMessageFlags);
-	bool isHUD = StrEqual(message.mType, "H", false);
+	bool isHUD = strcmp(message.mType, "H", false) == 0;
 
-	if (isHUD || StrEqual(message.mType, "M", false)) // HUD or top menu message?
+	if (isHUD || strcmp(message.mType, "M", false) == 0) // HUD or top menu message?
 	{
 		kv.GetColor4("color", message.mColor);
 	}
@@ -230,9 +230,9 @@ stock void SA_GetClientLanguage(int client, char buffer[3])
 	GetClientCookie(client, g_hSACustomLanguage, sBuffer, sizeof(sBuffer));
 	bool langExists; // Whether computed language code exists in our local config
 
-	if (!StrEqual(sBuffer, "geoip", false))
+	if (strcmp(sBuffer, "geoip", false) != 0)
 	{
-		if (StrEqual(sBuffer, "ingame", false) || StrEqual(sDefaultLanguage, "ingame", false)
+		if (strcmp(sBuffer, "ingame", false) == 0 || strcmp(sDefaultLanguage, "ingame", false) == 0
 			&& !gLanguages.GetValue(sBuffer, langExists))
 		{
 			SA_GetInGameLanguage(client, sBuffer, sizeof(sBuffer));
@@ -303,7 +303,7 @@ stock void PrintMessageEntry(int client, SMessageEntry message, bool isWelcome)
 	CheckMessageVariables(message, sText, sizeof(sText));
 	CheckMessageClientVariables(client, sText, sizeof(sText));
 
-	if (StrEqual(message.mType, "T", false))
+	if (strcmp(message.mType, "T", false) == 0)
 	{
 		bool addTag = (!isWelcome && message.mTag[0] != '\0');
 
@@ -322,11 +322,11 @@ stock void PrintMessageEntry(int client, SMessageEntry message, bool isWelcome)
 
 	CRemoveTags(sText, sizeof(sText)); // Clean colors, useless for the rest of display elements
 
-	if (StrEqual(message.mType, "C", false))
+	if (strcmp(message.mType, "C", false) == 0)
 	{
 		PrintCenterText(client, "%s", sText);
 	}
-	else if (StrEqual(message.mType, "H", false))
+	else if (strcmp(message.mType, "H", false) == 0)
 	{
 		SHUDParams params;
 		message.mHUDParams.GetArray(0, params, sizeof(params));
@@ -334,7 +334,7 @@ stock void PrintMessageEntry(int client, SMessageEntry message, bool isWelcome)
 			params.mEndColor, params.mEffect, 0.25, params.mFadeIn, params.mFadeOut);
 		ShowHudText(client, params.mChannel, "%s", sText);
 	}
-	else if (StrEqual(message.mType, "M", false)) // Top menu?
+	else if (strcmp(message.mType, "M", false) == 0) // Top menu?
 	{
 		KeyValues keyValues = new KeyValues("menu", "title", sText);
 		keyValues.SetNum("level", 1);
@@ -372,7 +372,7 @@ stock bool SA_CheckIfMapIsBanned(const char[] currentmap, const char[] bannedmap
 	int count = ExplodeString(bannedmap, ";", sBannedMapExploded, sizeof(sBannedMapExploded), sizeof(sBannedMapExploded[]));
 	for(int i = 0; i < count; i++)
 	{
-		if(StrEqual(sBannedMapExploded[i], currentmap) || StrContains(currentmap, sBannedMapExploded[i]) != -1)
+		if(strcmp(sBannedMapExploded[i], currentmap, false) == 0 || StrContains(currentmap, sBannedMapExploded[i]) != -1)
 		{
 			return true;
 		}
@@ -398,7 +398,7 @@ stock bool SA_ContainsMap(const char[] currentmap, const char[] mapname)
 	int count = ExplodeString(mapname, ";", sMapExploded, sizeof(sMapExploded), sizeof(sMapExploded[]));
 	for(int i = 0; i < count; i++)
 	{
-		if(StrEqual(sMapExploded[i], currentmap))
+		if(strcmp(sMapExploded[i], currentmap, false) == 0)
 		{
 			return true;
 		}
