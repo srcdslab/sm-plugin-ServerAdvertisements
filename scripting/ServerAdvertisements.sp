@@ -44,6 +44,8 @@ public void OnPluginStart()
 	g_b_Enabled = g_cV_Enabled.BoolValue;
 	g_cV_Enabled.AddChangeHook(OnConVarChanged);
 
+	SetCookieMenuItem(CookieHandler, 0, "Server Advertisements Settings");
+
 	g_hSACustomLanguage = RegClientCookie("SA_customlanguage", "Custom language for SA", CookieAccess_Private);
 
 	gLanguages = new StringMap();
@@ -207,6 +209,19 @@ public int hSALangMenu(Menu menu, MenuAction action, int client, int Position)
 
 	return 0;
 }
+
+// Cookies Handler Menu
+public void CookieHandler(int client, CookieMenuAction action, any info, char[] buffer, int maxlen)
+{
+	switch (action)
+	{
+		case CookieMenuAction_SelectOption:
+		{
+			Command_ChangeLanguage(client, 0);
+		}
+	}
+}
+
 public Action Timer_WelcomeMessage(Handle timer, int userid)
 {
 	int client = GetClientOfUserId(userid);
@@ -218,6 +233,7 @@ public Action Timer_WelcomeMessage(Handle timer, int userid)
 
 	return Plugin_Stop;
 }
+
 public void OnConVarChanged(ConVar cvar, const char[] oldValue, const char[] newValue)
 {
 	if(cvar == g_cV_Enabled)
@@ -230,6 +246,7 @@ public void OnConVarChanged(ConVar cvar, const char[] oldValue, const char[] new
 		}
 	}
 }
+
 public Action Command_SAr(int client, int args)
 {
 	LoadMessages();
@@ -237,6 +254,7 @@ public Action Command_SAr(int client, int args)
 	CReplyToCommand(client, "{green}%s {default}Messages reloaded", SA);
 	return Plugin_Handled;
 }
+
 public void LoadConfig()
 {
 	delete gLanguages;
@@ -295,6 +313,7 @@ public void LoadConfig()
 
 	delete kvConfig;
 }
+
 public void LoadMessages()
 {
 	OnMapEnd();
@@ -325,6 +344,7 @@ public void LoadMessages()
 
 	delete kvMessages;
 }
+
 public Action Timer_PrintMessage(Handle timer, float period)
 {
 	char periodBuf[32];
