@@ -54,6 +54,7 @@ public void OnPluginStart()
 
 	HookEvent("player_disconnect", OnPlayerDisconnect);
 }
+
 public void OnMapStart()
 {
 	char sTempMap[PLATFORM_MAX_PATH];
@@ -98,6 +99,7 @@ public void OnMapEnd()
 	delete gGreetedAuthIds;
 	gGreetedAuthIds = new StringMap();
 }
+
 public void OnClientPostAdminCheck(int client)
 {
 	if (IsValidClient(client))
@@ -114,6 +116,7 @@ public void OnClientPostAdminCheck(int client)
 		}
 	}
 }
+
 public void OnPlayerDisconnect(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(GetEventInt(event, "userid"));
@@ -125,51 +128,71 @@ public void OnPlayerDisconnect(Event event, const char[] name, bool dontBroadcas
 		gGreetedAuthIds.Remove(authId);
 	}
 }
+
 public Action Command_ChangeLanguage(int client, int args)
 {
-	if(IsValidClient(client))
+	if (IsValidClient(client))
 	{
-		char sTempLang[12], sTempLangSelected[12], sBuffer[64];
-		SA_GetInGameLanguage(client, sTempLang, sizeof(sTempLang));
-		GetClientCookie(client, g_hSACustomLanguage, sTempLangSelected, sizeof(sTempLangSelected));
-		String_ToLower(sTempLangSelected, sTempLangSelected, sizeof(sTempLangSelected));
-		Menu mSALangMenu = CreateMenu(hSALangMenu);
-		mSALangMenu.SetTitle("%s Choose your language", SA);
-		FormatEx(sBuffer, sizeof(sBuffer), "By IP %s", StrEqual(sTempLangSelected, "geoip", false) ?
-			"[*]" : NULL_STRING);
-		mSALangMenu.AddItem("geoip", sBuffer, StrEqual(sTempLangSelected, "geoip", false) ?
-			ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
-		FormatEx(sBuffer, sizeof(sBuffer), "By game (%s) %s", sTempLang,
-			StrEqual(sTempLangSelected, "ingame", false) ? "[*]" : NULL_STRING);
-		mSALangMenu.AddItem("ingame", sBuffer, StrEqual(sTempLangSelected, "ingame", false) ?
-			ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
-		bool clientLangExists;
+		CreateServerAdvertMenu(client);
+	}
+	return Plugin_Handled;
+}
 
-		if (gLanguages.GetValue(sTempLangSelected, clientLangExists))
+public void CookieHandler(int client, CookieMenuAction action, any info, char[] buffer, int maxlen)
+{
+	switch (action)
+	{
+		case CookieMenuAction_SelectOption:
 		{
-			gLanguages.Remove(sTempLangSelected);
-			AddLanguageMenuItem(mSALangMenu, sTempLangSelected, " [*]", ITEMDRAW_DISABLED);
+			CreateServerAdvertMenu(client);
 		}
+	}
+}
 
-		StringMapSnapshot languages = gLanguages.Snapshot();
+public void CreateServerAdvertMenu(int client)
+{
+	CreateLanguageMenu(client, ServerAdvertSettingHandler, "[SA] Choose your language");
+}
 
-		for (int i; i < languages.Length; ++i)
-		{
-			languages.GetKey(i, sTempLang, sizeof(sTempLang));
-			AddLanguageMenuItem(mSALangMenu, sTempLang, NULL_STRING, ITEMDRAW_DEFAULT);
-		}
+void CreateLanguageMenu(int client, MenuHandler handler, const char[] titleFormat)
+{
+	char sTempLang[12], sTempLangSelected[12], sBuffer[64];
+	SA_GetInGameLanguage(client, sTempLang, sizeof(sTempLang));
+	GetClientCookie(client, g_hSACustomLanguage, sTempLangSelected, sizeof(sTempLangSelected));
+	String_ToLower(sTempLangSelected, sTempLangSelected, sizeof(sTempLangSelected));
 
-		if (clientLangExists)
-		{
-			gLanguages.SetValue(sTempLangSelected, true);
-		}
+	Menu menu = new Menu(handler, MENU_ACTIONS_ALL);
+	menu.SetTitle(titleFormat, SA);
 
-		delete languages;
-		mSALangMenu.ExitButton = true;
-		mSALangMenu.Display(client, MENU_TIME_FOREVER);
+	FormatEx(sBuffer, sizeof(sBuffer), "By IP %s", StrEqual(sTempLangSelected, "geoip", false) ? "[*]" : NULL_STRING);
+	menu.AddItem("geoip", sBuffer, StrEqual(sTempLangSelected, "geoip", false) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+
+	FormatEx(sBuffer, sizeof(sBuffer), "By game (%s) %s", sTempLang, StrEqual(sTempLangSelected, "ingame", false) ? "[*]" : NULL_STRING);
+	menu.AddItem("ingame", sBuffer, StrEqual(sTempLangSelected, "ingame", false) ? ITEMDRAW_DISABLED : ITEMDRAW_DEFAULT);
+
+	bool clientLangExists;
+	if (gLanguages.GetValue(sTempLangSelected, clientLangExists))
+	{
+		gLanguages.Remove(sTempLangSelected);
+		AddLanguageMenuItem(menu, sTempLangSelected, " [*]", ITEMDRAW_DISABLED);
 	}
 
-	return Plugin_Handled;
+	StringMapSnapshot languages = gLanguages.Snapshot();
+	for (int i = 0; i < languages.Length; ++i)
+	{
+		languages.GetKey(i, sTempLang, sizeof(sTempLang));
+		AddLanguageMenuItem(menu, sTempLang, NULL_STRING, ITEMDRAW_DEFAULT);
+	}
+
+	if (clientLangExists)
+	{
+		gLanguages.SetValue(sTempLangSelected, true);
+	}
+
+	delete languages;
+	menu.ExitBackButton = true;
+	menu.ExitButton = true;
+	menu.Display(client, MENU_TIME_FOREVER);
 }
 
 void AddLanguageMenuItem(Menu menu, const char[] code, const char[] extra, int flags)
@@ -191,36 +214,29 @@ void AddLanguageMenuItem(Menu menu, const char[] code, const char[] extra, int f
 	menu.AddItem(code, item, flags);
 }
 
-public int hSALangMenu(Menu menu, MenuAction action, int client, int Position)
-{
-	if(action == MenuAction_Select)
-	{
-		if(IsValidClient(client))
-		{
-			char Item[10];
-			menu.GetItem(Position, Item, sizeof(Item));
-			SetClientCookie(client, g_hSACustomLanguage, Item);
-		}
-	}
-	else if(action == MenuAction_End)
-	{
-		delete menu;
-	}
-
-	return 0;
-}
-
-// Cookies Handler Menu
-public void CookieHandler(int client, CookieMenuAction action, any info, char[] buffer, int maxlen)
+public int ServerAdvertSettingHandler(Menu menu, MenuAction action, int param1, int param2)
 {
 	switch (action)
 	{
-		case CookieMenuAction_SelectOption:
+		case MenuAction_Select:
 		{
-			Command_ChangeLanguage(client, 0);
+			if (!IsValidClient(param1))
+				return 0;
+
+			char info[64];
+			menu.GetItem(param2, info, sizeof(info));
+			SetClientCookie(param1, g_hSACustomLanguage, info);
+
+			CreateServerAdvertMenu(param1);
 		}
+		case MenuAction_Cancel:
+			ShowCookieMenu(param1);
+		case MenuAction_End:
+			delete menu;
 	}
+	return 0;
 }
+
 
 public Action Timer_WelcomeMessage(Handle timer, int userid)
 {
