@@ -7,7 +7,7 @@ stock void AddMessagesToArray(KeyValues kv)
 		if(SA_CheckDate(kv))
 		{
 			char sTempMap[256];
-			char sBannedMap[512];
+			char sBannedMap[BUFFER_MAX_SIZE];
 			kv.GetString("maps", sTempMap, sizeof(sTempMap), "all");
 			kv.GetString("ignore_maps", sBannedMap, sizeof(sBannedMap), "none");
 			if(SA_CheckIfMapIsBanned(sMapName, sBannedMap))
@@ -39,7 +39,7 @@ stock void AddMessagesToArray(KeyValues kv)
 stock void AddMessagesToEntry(KeyValues kv, SMessageEntry message)
 {
 	message.mTextByLanguage = new StringMap();
-	char sMessageFlags[16], sTempLanguageName[12], sTempLanguageMessage[512], name[MAX_NAME_LENGTH];
+	char sMessageFlags[16], sTempLanguageName[12], sTempLanguageMessage[BUFFER_MAX_SIZE], name[MAX_NAME_LENGTH];
 	StringMapSnapshot languages = gLanguages.Snapshot();
 
 	for (int i; i < languages.Length; ++i)
