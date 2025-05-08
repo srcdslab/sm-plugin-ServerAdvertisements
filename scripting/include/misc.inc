@@ -145,7 +145,7 @@ stock void CheckMessageVariables(SMessageEntry message, char[] text, int len)
 	{
 		char sTempMap[256];
 		GetCurrentMap(sTempMap, sizeof(sTempMap));
-		GetMapDisplayName(sTempMap, sBuffer, sizeof(sBuffer));
+		GetMapDisplayNameOptimized(sTempMap, sBuffer, sizeof(sBuffer));
 		ReplaceString(text, len, "{CURRENTMAP}", sBuffer);
 	}
 
@@ -199,7 +199,7 @@ stock void CheckMessageVariables(SMessageEntry message, char[] text, int len)
 
 		LoopClients(x)
 		{
-			if(IsValidClient(x) && IsPlayerAdmin(x))
+			if(IsClientValid(x) && IsPlayerAdmin(x))
 			{
 				adminsLen += FormatEx(sAdminList[adminsLen], sizeof(sAdminList) - adminsLen, "%s'%N'", separator, x);
 				separator = ", ";
@@ -215,7 +215,7 @@ stock void CheckMessageVariables(SMessageEntry message, char[] text, int len)
 
 		LoopClients(x)
 		{
-			if(IsValidClient(x) && IsPlayerVIP(x))
+			if(IsClientValid(x) && IsPlayerVIP(x))
 			{
 				vipsLen += FormatEx(sVIPList[vipsLen], sizeof(sVIPList) - vipsLen, "%s'%N'", separator, x);
 				separator = ", ";
