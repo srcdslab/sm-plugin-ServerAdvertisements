@@ -4,6 +4,7 @@
 #include <clientprefs>
 #include <multicolors>
 #include <smlib/strings>
+#include <utilshelper>
 
 #include "include/globals"
 #include "include/client"
@@ -11,7 +12,7 @@
 #pragma newdecls required
 #pragma semicolon 1
 
-#define LoopClients(%1) for(int %1 = 1;%1 <= MaxClients;%1++) if(IsValidClient(%1))
+#define LoopClients(%1) for(int %1 = 1;%1 <= MaxClients;%1++) if(IsClientValid(%1))
 
 #if (!defined MAX_AUTHID_LENGTH)
 #define MAX_AUTHID_LENGTH 64 /**< Maximum buffer required to store any AuthID type */
@@ -59,7 +60,7 @@ public void OnMapStart()
 {
 	char sTempMap[PLATFORM_MAX_PATH];
 	GetCurrentMap(sTempMap, sizeof(sTempMap));
-	GetMapDisplayName(sTempMap, sMapName,sizeof(sMapName));
+	GetMapDisplayNameOptimized(sTempMap, sMapName,sizeof(sMapName));
 	LoadConfig();
 }
 
@@ -102,7 +103,7 @@ public void OnMapEnd()
 
 public void OnClientPostAdminCheck(int client)
 {
-	if (IsValidClient(client))
+	if (IsClientValid(client))
 	{
 		if (gWelcomeMessage.mTextByLanguage != null)
 		{
@@ -131,7 +132,7 @@ public void OnPlayerDisconnect(Event event, const char[] name, bool dontBroadcas
 
 public Action Command_ChangeLanguage(int client, int args)
 {
-	if (IsValidClient(client))
+	if (IsClientValid(client))
 	{
 		CreateServerAdvertMenu(client);
 	}
@@ -220,7 +221,7 @@ public int ServerAdvertSettingHandler(Menu menu, MenuAction action, int param1, 
 	{
 		case MenuAction_Select:
 		{
-			if (!IsValidClient(param1))
+			if (!IsClientValid(param1))
 				return 0;
 
 			char info[64];
@@ -242,7 +243,7 @@ public Action Timer_WelcomeMessage(Handle timer, int userid)
 {
 	int client = GetClientOfUserId(userid);
 
-	if (IsValidClient(client))
+	if (IsClientValid(client))
 	{
 		PrintMessageEntry(client, gWelcomeMessage, true);
 	}
