@@ -13,7 +13,7 @@ jobs:
         include:
           - os: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build sourcemod plugin
         uses: maxime1907/action-sourceknight@v1
         with:
@@ -26,7 +26,7 @@ jobs:
           cp -R configs /tmp/package/common/addons/sourcemod/
 
       - name: Upload build archive for test runners
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ runner.os }}
           path: /tmp/package
@@ -36,7 +36,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
 
       - uses: dev-drprasad/delete-tag-and-release@v1.1
@@ -60,7 +60,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ runner.os }}
+          path: artifacts
 
       - name: Versioning
         run: |
@@ -72,12 +75,11 @@ jobs:
 
       - name: Package
         run: |
+          cd artifacts
           ls -Rall
-          if [ -d "./Linux/" ]; then
-            cd ./Linux/
-            tar -czf ../${{ github.event.repository.name }}-${{ env.RELEASE_VERSION }}.tar.gz -T <(\ls -1)
-            cd -
-          fi
+          tar -czf ../${{ github.event.repository.name }}-${{ env.RELEASE_VERSION }}.tar.gz .
+          cd ..
+          ls -la *.tar.gz
 
       - name: Release
         uses: svenstaro/upload-release-action@v2
