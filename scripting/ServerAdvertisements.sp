@@ -39,7 +39,7 @@ public void OnPluginStart()
 
 	RegConsoleCmd("sm_SAlang", Command_ChangeLanguage);
 
-	BuildPath(Path_SM, sConfigPath, sizeof(sConfigPath), "configs/ServerAdvertisements.cfg");
+	BuildPath(Path_SM, g_sConfigPath, sizeof(g_sConfigPath), "configs/ServerAdvertisements.cfg");
 
 	g_cV_Enabled = CreateConVar("sm_SA_enable", "1", "Enable/Disable ServerAdvertisements");
 	g_b_Enabled = g_cV_Enabled.BoolValue;
@@ -60,7 +60,7 @@ public void OnMapStart()
 {
 	char sTempMap[PLATFORM_MAX_PATH];
 	GetCurrentMap(sTempMap, sizeof(sTempMap));
-	GetMapDisplayNameOptimized(sTempMap, sMapName,sizeof(sMapName));
+	GetMapDisplayNameOptimized(sTempMap, g_sMapName, sizeof(g_sMapName));
 	LoadConfig();
 }
 
@@ -282,21 +282,21 @@ public void LoadConfig()
 	gWelcomeMessage.mHUDParams = null;
 	KeyValues kvConfig = new KeyValues("ServerAdvertisements");
 
-	if (!kvConfig.ImportFromFile(sConfigPath))
+	if (!kvConfig.ImportFromFile(g_sConfigPath))
 	{
 		delete kvConfig;
-		SetFailState("%s Unable to find or load %s", SA, sConfigPath);
+		SetFailState("%s Unable to find or load %s", SA, g_sConfigPath);
 	}
 
 	if(kvConfig.JumpToKey("Settings"))
 	{
-		kvConfig.GetString("ServerName", sServerName, sizeof(sServerName), "[ServerAdvertisements]");
-		fTime = kvConfig.GetFloat("Time", 30.0);
-		gRandomize = view_as<bool>(kvConfig.GetNum("Random"));
+		kvConfig.GetString("ServerName", g_sServerName, sizeof(g_sServerName), "[ServerAdvertisements]");
+		g_fTime = kvConfig.GetFloat("Time", 30.0);
+		g_bRandomize = view_as<bool>(kvConfig.GetNum("Random"));
 		char sLanguages[64], sLanguageList[64][12];
 		kvConfig.GetString("Languages", sLanguages, sizeof(sLanguages));
-		kvConfig.GetString("Default language", sDefaultLanguage, sizeof(sDefaultLanguage), "geoip");
-		bExpiredMessagesDebug = view_as<bool>(kvConfig.GetNum("Log expired messages", 0));
+		kvConfig.GetString("Default language", g_sDefaultLanguage, sizeof(g_sDefaultLanguage), "geoip");
+		g_bExpiredMessagesDebug = view_as<bool>(kvConfig.GetNum("Log expired messages", 0));
 
 		for (int i = ExplodeString(sLanguages, ";", sLanguageList, sizeof(sLanguageList), sizeof(sLanguageList[]));
 			--i >= 0;)
@@ -308,7 +308,7 @@ public void LoadConfig()
 		if (gLanguages.Size < 1)
 		{
 			delete kvConfig;
-			SetFailState("%s No language found! Please set languages in 'Settings' part in %s", SA, sConfigPath);
+			SetFailState("%s No language found! Please set languages in 'Settings' part in %s", SA, g_sConfigPath);
 		}
 
 		LoadMessages();
@@ -317,7 +317,7 @@ public void LoadConfig()
 	else
 	{
 		delete kvConfig;
-		SetFailState("%s Unable to find Settings in %s", SA, sConfigPath);
+		SetFailState("%s Unable to find Settings in %s", SA, g_sConfigPath);
 	}
 	if(kvConfig.JumpToKey("Welcome Message"))
 	{
@@ -336,10 +336,10 @@ public void LoadMessages()
 	OnMapEnd();
 	KeyValues kvMessages = new KeyValues("ServerAdvertisements");
 
-	if (!kvMessages.ImportFromFile(sConfigPath))
+	if (!kvMessages.ImportFromFile(g_sConfigPath))
 	{
 		delete kvMessages;
-		SetFailState("%s Unable to find or load %s", SA, sConfigPath);
+		SetFailState("%s Unable to find or load %s", SA, g_sConfigPath);
 	}
 
 	if(kvMessages.JumpToKey("Messages"))
@@ -356,7 +356,7 @@ public void LoadMessages()
 	else
 	{
 		delete kvMessages;
-		SetFailState("%s Unable to find Messages in %s", SA, sConfigPath);
+		SetFailState("%s Unable to find Messages in %s", SA, g_sConfigPath);
 	}
 
 	delete kvMessages;
@@ -370,7 +370,7 @@ public Action Timer_PrintMessage(Handle timer, float period)
 	gMessageGroups.GetArray(periodBuf, group, sizeof(group));
 	int next;
 
-	if (gRandomize)
+	if (g_bRandomize)
 	{
 		next = GetRandomInt(0, group.mMessages.Length - 1);
 	}

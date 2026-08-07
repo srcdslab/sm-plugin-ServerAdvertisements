@@ -1,7 +1,7 @@
 #define SA "[SA]"
 #define PLUGIN_NAME "ServerAdvertisements"
 #define PLUGIN_AUTHOR "ESK0"
-#define PLUGIN_VERSION "3.3.4"
+#define PLUGIN_VERSION "3.3.6"
 
 #define TAG_SIZE 64
 #define BUFFER_MAX_SIZE 2048
@@ -42,19 +42,19 @@ enum struct SHUDParams
 	float mFadeOut;
 }
 
-char sConfigPath[PLATFORM_MAX_PATH];
-char sServerName[TAG_SIZE];
-char sMapName[128];
-float fTime;
-bool gRandomize;
+char g_sConfigPath[PLATFORM_MAX_PATH];
+char g_sServerName[TAG_SIZE];
+char g_sMapName[128];
+float g_fTime;
+bool g_bRandomize;
 
 StringMap gLanguages, gMessageGroups;
 
 ConVar g_cV_Enabled;
 bool g_b_Enabled;
 
-bool bExpiredMessagesDebug;
-char sDefaultLanguage[12];
+bool g_bExpiredMessagesDebug;
+char g_sDefaultLanguage[12];
 
 float g_fWM_Delay;
 SMessageEntry gWelcomeMessage;

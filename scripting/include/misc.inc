@@ -10,15 +10,15 @@ stock void AddMessagesToArray(KeyValues kv)
 			char sBannedMap[BUFFER_MAX_SIZE];
 			kv.GetString("maps", sTempMap, sizeof(sTempMap), "all");
 			kv.GetString("ignore_maps", sBannedMap, sizeof(sBannedMap), "none");
-			if(SA_CheckIfMapIsBanned(sMapName, sBannedMap))
+			if(SA_CheckIfMapIsBanned(g_sMapName, sBannedMap))
 			{
 				return;
 			}
-			if(strcmp(sTempMap, "all", false) == 0 || SA_ContainsMap(sMapName, sTempMap) || SA_ContainsMapPreFix(sMapName, sTempMap))
+			if(strcmp(sTempMap, "all", false) == 0 || SA_ContainsMap(g_sMapName, sTempMap) || SA_ContainsMapPreFix(g_sMapName, sTempMap))
 			{
 				SMessageEntry message;
 				AddMessagesToEntry(kv, message);
-				float time = kv.GetFloat("time", fTime);
+				float time = kv.GetFloat("time", g_fTime);
 				char timeBuf[32];
 				FormatEx(timeBuf, sizeof(timeBuf), "%.2f", time);
 				SMessageGroup group;
@@ -60,7 +60,7 @@ stock void AddMessagesToEntry(KeyValues kv, SMessageEntry message)
 
 	delete languages;
 	kv.GetString("type", message.mType, sizeof(message.mType), "T");
-	kv.GetString("tag", message.mTag, sizeof(message.mTag), sServerName);
+	kv.GetString("tag", message.mTag, sizeof(message.mTag), g_sServerName);
 	kv.GetString("flags", sMessageFlags, sizeof(sMessageFlags));
 	message.mFlags = ReadFlagString(sMessageFlags);
 	kv.GetString("ignore", sMessageFlags, sizeof(sMessageFlags));
@@ -232,7 +232,7 @@ stock void SA_GetClientLanguage(int client, char buffer[3])
 
 	if (strcmp(sBuffer, "geoip", false) != 0)
 	{
-		if (strcmp(sBuffer, "ingame", false) == 0 || strcmp(sDefaultLanguage, "ingame", false) == 0
+		if (strcmp(sBuffer, "ingame", false) == 0 || strcmp(g_sDefaultLanguage, "ingame", false) == 0
 			&& !gLanguages.GetValue(sBuffer, langExists))
 		{
 			SA_GetInGameLanguage(client, sBuffer, sizeof(sBuffer));
@@ -456,7 +456,7 @@ stock bool SA_CheckDate(KeyValues kv)
 		}
 		else
 		{
-			if(bExpiredMessagesDebug == true)
+			if(g_bExpiredMessagesDebug == true)
 			{
 				kv.GetSectionName(name, sizeof(name));
 				LogError("%s Message \"%s\" is not available anymore. The message expired on %s", SA, name, sEnabledTill);
