@@ -7,8 +7,8 @@ This repository contains **ServerAdvertisements**, a SourcePawn plugin for Sourc
 ## Technical Environment
 
 - **Language**: SourcePawn (.sp files, .inc includes)
-- **Platform**: SourceMod 1.11.0+ (Source engine games like CS:GO, CS2, TF2)
-- **Build System**: SourceKnight (configured via `sourceknight.yaml`)
+- **Platform**: SourceMod 1.12.x (Source engine games like CS:GO, CS2, TF2)
+- **Build System**: Native GitHub Actions (configured via `.github/workflows/ci.yml`), using `rumblefrog/setup-sp` to install the SourcePawn compiler
 - **Compiler**: SourceMod compiler (spcomp) - handles compilation to .smx bytecode
 - **CI/CD**: GitHub Actions workflow in `.github/workflows/ci.yml`
 
@@ -21,7 +21,7 @@ The plugin requires these SourceMod extensions and libraries:
 - **utilshelper** - Additional utility functions
 - Standard includes: `geoip`, `clientprefs`, `sdktools`
 
-Dependencies are automatically handled by SourceKnight during build.
+Dependencies are automatically cloned and copied into place by the GitHub Actions workflow during build.
 
 ## Project Structure
 
@@ -36,7 +36,6 @@ Dependencies are automatically handled by SourceKnight during build.
 /configs/
 └── ServerAdvertisements.cfg         # Plugin configuration file
 
-sourceknight.yaml                    # Build configuration
 .github/workflows/ci.yml            # GitHub Actions CI/CD
 ```
 
@@ -97,26 +96,23 @@ This codebase follows these SourcePawn conventions:
 
 ### Local Development Build
 ```bash
-# SourceKnight handles all dependencies and compilation
-# The build system uses Docker and is configured via sourceknight.yaml
-# If you have SourceKnight installed locally:
-sourceknight build
-
-# Alternative: Use the same build process as GitHub Actions
-# This uses the maxime1907/action-sourceknight Docker action
-docker run --rm -v $(pwd):/workspace sourceknight/build
+# Install the SourcePawn compiler (spcomp) matching SourceMod 1.12.x,
+# clone the git dependencies listed in .github/workflows/ci.yml into
+# addons/sourcemod/scripting/include, then compile:
+spcomp -i addons/sourcemod/scripting/include -o addons/sourcemod/plugins/ServerAdvertisements.smx scripting/ServerAdvertisements.sp
 ```
 
 ### GitHub Actions Build
-The repository uses GitHub Actions for CI/CD:
-- Builds automatically on push/PR using `maxime1907/action-sourceknight@v1`
+The repository uses native GitHub Actions for CI/CD (`.github/workflows/ci.yml`):
+- Installs spcomp via `rumblefrog/setup-sp` (SourceMod 1.12.x)
+- Clones git dependencies (MultiColors, smlib, UtilsHelper) and compiles the plugin
 - Creates packages with both plugin and config files
-- Generates releases with downloadable tar.gz archives
+- Generates releases with downloadable tar.gz archives, tagged `latest` on pushes to master/main
 
 ### File Locations After Build
-- Compiled plugin: `.sourceknight/package/common/addons/sourcemod/plugins/ServerAdvertisements.smx`
+- Compiled plugin: `addons/sourcemod/plugins/ServerAdvertisements.smx`
 - Config files: `configs/ServerAdvertisements.cfg` → copies to package structure
-- Include files: All dependencies are automatically resolved by SourceKnight
+- Include files: All dependencies are cloned and copied into place by the CI workflow
 
 ### Auto-Generated Config
 The plugin creates a ConVar config file automatically:
