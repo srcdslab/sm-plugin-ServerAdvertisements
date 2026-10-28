@@ -384,13 +384,16 @@ public Action Timer_PrintMessage(Handle timer, float period)
 	SMessageEntry message;
 	group.mMessages.GetArray(next, message, sizeof(message));
 
+	StringMap renderedByLanguage = new StringMap();
+
 	LoopClients(i)
 	{
 		if (message.HasAccess(i))
 		{
-			PrintMessageEntry(i, message, false);
+			PrintMessageEntry(i, message, false, renderedByLanguage);
 		}
 	}
 
+	delete renderedByLanguage;
 	return Plugin_Continue;
 }
