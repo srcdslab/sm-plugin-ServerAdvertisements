@@ -293,14 +293,23 @@ stock void GetServerIP(char[] buffer, int len)
 	FormatEx(buffer, len, "%d.%d.%d.%d:%d", ips[0], ips[1], ips[2], ips[3], port);
 }
 
-stock void PrintMessageEntry(int client, SMessageEntry message, bool isWelcome)
+stock void PrintMessageEntry(int client, SMessageEntry message, bool isWelcome, StringMap renderedByLanguage = null)
 {
 	char sCountryTag[3], sText[2048];
 	SA_GetClientLanguage(client, sCountryTag);
-	message.mTextByLanguage.GetString(sCountryTag, sText, sizeof(sText));
-	TrimString(sText);
-	ReplaceString(sText, sizeof(sText), "\\n", "\n");
-	CheckMessageVariables(message, sText, sizeof(sText));
+
+	// The server-wide part of the text is the same for every client of a language, render it once per broadcast
+	if (renderedByLanguage == null || !renderedByLanguage.GetString(sCountryTag, sText, sizeof(sText)))
+	{
+		message.mTextByLanguage.GetString(sCountryTag, sText, sizeof(sText));
+		TrimString(sText);
+		ReplaceString(sText, sizeof(sText), "\\n", "\n");
+		CheckMessageVariables(message, sText, sizeof(sText));
+
+		if (renderedByLanguage != null)
+			renderedByLanguage.SetString(sCountryTag, sText);
+	}
+
 	CheckMessageClientVariables(client, sText, sizeof(sText));
 
 	if (strcmp(message.mType, "T", false) == 0)
